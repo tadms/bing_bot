@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+
+# Install packages
+sudo apt-get install curl jq unzip tree
+
+# Download and extract the bing_bot project
+wget -O bing_bot.zip https://github.com/tadms/bing_bot/archive/master.zip
+unzip bing_bot.zip
+mv bing_bot-master/ bing_bot/
+chmod -R +x bing_bot/bin/
+
+# Display directory structure and usage
+clear
+echo -e "bing_bot - Setup complete!"
+echo ""
+tree bing_bot/
+echo ""
+echo "bing_bot/bin/bing_bot -h"
+bing_bot/bin/bing_bot -h

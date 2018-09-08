@@ -1,0 +1,223 @@
+#!/usr/bin/env bash
+
+################################################################################
+# BING_BOT
+################################################################################
+function display_banner {
+BANNER="
+$LINE_BOLD
+$LINE
+$TXTGRN
+    ____  _____   ________   ____  ____  ______
+   / __ )/  _/ | / / ____/  / __ )/ __ \/_  __/
+  / __  |/ //  |/ / / __   / __  / / / / / /
+ / /_/ // // /|  / /_/ /  / /_/ / /_/ / / /
+/_____/___/_/ |_/\____/  /_____/\____/ /_/
+$TXTRST
+$TXTBLD\"The Bot that Bing's, so you don't have to...\" $TXTRST
+
+$TXTBLD"GitHub:"$TXTRST   $TXTPRP"https://github.com/tadms/bing_bot"$TXTRST
+$TXTBLD"Config:"$TXTRST   $TXTPRP"$CONFIG_FILE"$TXTRST
+$TXTBLD"Log:"$TXTRST      $TXTPRP"$LOG_FILE"$TXTRST
+
+$LINE
+$LINE_BOLD
+"
+clear && echo "$BANNER"
+}
+
+################################################################################
+# Initialize functions
+################################################################################
+function init_config {
+  local config_file=$1
+  if [ -f $config_file ] ; then
+    RANDOM_WORDS_REPO=$(cat $config_file | jq -r .random_words_repo)
+    MIN_SECONDS=$(cat $config_file | jq -r .min_seconds_between_searches)
+    MAX_SECONDS=$(cat $config_file | jq -r .max_seconds_between_searches)
+    MIN_SEARCHES=$(cat $config_file | jq -r .min_amount_of_searches_to_run)
+    MAX_SEARCHES=$(cat $config_file | jq -r .max_amount_of_searches_to_run)
+    BROWSER_PROCESS=$(cat $config_file | jq -r .browser_process_name)
+    LOG_FILE=$(cat $config_file | jq -r .log_file_path)
+  else
+    echo "ERROR - Configuration file [$config_file] not found."
+    exit 1
+  fi
+}
+
+function init_colors {
+  TXTGRN=$(tput setaf 2)
+  TXTPRP=$(tput setaf 5)
+  TXTBLD=$(tput bold)
+  TXTRST=$(tput sgr0)
+  LINE=$(printf "%0.s-" {1..80})
+  LINE_BOLD=$(printf "%0.s#" {1..80})
+}
+
+
+################################################################################
+# Logging functions
+################################################################################
+function log {
+  local msg=$@
+  echo "$(date +"%m-%d-%y %T") - $msg" >> $LOG_FILE
+}
+
+function rotate_log {
+  touch $LOG_FILE
+  local max_line_count=5000
+  local current_line_count="$(cat $LOG_FILE | wc -l)"
+  if [ $current_line_count -ge $max_line_count ] ; then
+    sed -i 1,100d $LOG_FILE
+  fi
+}
+
+function start_log {
+  echo >> $LOG_FILE
+  echo $LINE_BOLD >> $LOG_FILE
+  echo "$(date) - BING BOT START" >> $LOG_FILE
+  echo $LINE_BOLD >> $LOG_FILE
+}
+
+function end_log {
+  echo $LINE >> $LOG_FILE
+  echo "$(date) - BING BOT COMPLETE" >> $LOG_FILE
+  echo $LINE >> $LOG_FILE
+  echo >> $LOG_FILE
+}
+
+
+################################################################################
+# Utility functions
+################################################################################
+function show_progress {
+  local msg="$@        "
+  echo -ne "$TXTGRN""$msg""$TXTRST"\\r
+}
+
+function bing {
+  local term=$@
+  chromium-browser "http://www.bing.com/search?q=$term" > /dev/null 2>&1 &
+}
+
+
+################################################################################
+# Randomizing functions
+################################################################################
+function rand_range {
+  local min=$1
+  local max=$2
+  local rand=$(shuf -i $min-$max -n 1)
+  echo $rand
+}
+
+function generate_rand_seconds {
+  local min=$MIN_SECONDS
+  local max=$MAX_SECONDS
+  local rand_seconds=$(rand_range $min $max)
+  echo $rand_seconds
+}
+
+function generate_rand_search_count {
+  local min=$MIN_SEARCHES
+  local max=$MAX_SEARCHES
+  local rand_search_count=$(rand_range $min $max)
+  echo $rand_search_count
+}
+
+function generate_rand_word {
+    local rand_words=$(curl -ks $RANDOM_WORDS_REPO | jq -r .[])
+    local ultra_rando=$(($RANDOM + $RANDOM))
+    local rand_word=$(echo "$rand_words" \
+    | tr -dc '[:alnum:]\n\r' \
+    | head -$ultra_rando \
+    | tail -1)
+    echo $rand_word
+}
+
+function generate_rand_word {
+    local rand_words=$(curl -ks $RANDOM_WORDS_REPO | jq -r .[])
+    local ultra_rando=$(($RANDOM + $RANDOM))
+    local rand_word=$(echo "$rand_words" \
+    | tr -dc '[:alnum:]\n\r' \
+    | head -$ultra_rando \
+    | tail -1)
+    echo $rand_word
+}
+
+
+################################################################################
+# Help / Option parsing
+################################################################################
+function print_help {
+local help_banner="
+Usage
+-----
+    ./bing_bot                      Start up the bing_bot with defaults
+    ./bing_bot -c [config.json]     Start up the bing_bot with custom config
+    ./bing_bot -h                   Display this screen
+"
+echo -n "$help_banner"
+}
+
+function opt_parse {
+  CONFIG_OPTION=false
+  CONFIG_FILE="../conf/default_conf.json"
+  while getopts ":hc:" opt; do
+    case $opt in
+      h)
+        print_help
+        exit 0
+        ;;
+      c)
+        CONFIG_OPTION=true
+        CONFIG_FILE=$OPTARG
+        ;;
+      \?)
+        echo "Invalid option: -$OPTARG" >&2
+        exit 1
+        ;;
+      :)
+        echo "Option -$OPTARG requires an argument." >&2
+        exit 1
+        ;;
+    esac
+  done
+}
+
+
+################################################################################
+# Main
+################################################################################
+function main {
+  init_colors
+  init_config $CONFIG_FILE
+  display_banner
+
+  local count=1
+  local reps=$(generate_rand_search_count)
+
+  start_log
+  for (( c=$count; c<=$reps; c++ )) ; do
+    local word=$(generate_rand_word)
+    local time=$(generate_rand_seconds)
+    local msg="[$count/$reps] - Searching [$word] - Waiting [$time seconds]"
+
+    show_progress "$msg"
+    log "$msg"
+
+    bing $word
+    sleep $time
+    killall $BROWSER_PROCESS > /dev/null 2>&1
+
+    local count=$(($count + 1))
+  done
+
+  end_log
+  rotate_log
+  echo "$TXTGRN""Done-Zo!  Completed [$reps] random bing searches.    ""$TXTRST"
+  echo
+}
+
+opt_parse "$@"
+main
