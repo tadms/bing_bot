@@ -37,7 +37,7 @@ Manual Setup
 4. (Optional) Modify config as desired. <br>
 `vim bing_bot/conf/default_conf.json`
 
-5. Change to the bin directory.
+5. Change to the bin directory.  
 `cd bing_bot/bin`
 
 5. Start up the bing_bot: <br>
