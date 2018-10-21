@@ -13,7 +13,7 @@ rm bing_bot.zip
 # Setup logs
 sudo mkdir /var/log/bing_bot
 sudo chown -R pi:pi /var/log/bing_bot
-touch /var/log/bing_bot.log
+touch /var/log/bing_bot/bing_bot.log
 
 # Display directory structure and usage
 clear
