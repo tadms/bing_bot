@@ -8,6 +8,12 @@ wget -O bing_bot.zip https://github.com/tadms/bing_bot/archive/master.zip
 unzip bing_bot.zip
 mv bing_bot-master/ bing_bot/
 chmod -R +x bing_bot/bin/
+rm bing_bot.zip
+
+# Setup logs
+sudo mkdir /var/log/bing_bot
+sudo chown -R pi:pi /var/log/bing_bot
+touch /var/log/bing_bot.log
 
 # Display directory structure and usage
 clear

@@ -59,7 +59,7 @@ The default configuration can be found in `conf/default_conf.json`.
     	"min_amount_of_searches_to_run": "45",
     	"max_amount_of_searches_to_run": "60",
     	"browser_process_name": "chromium-browser",
-    	"log_file_path": "../log/bing_bot.log",
+    	"log_file_path": "/var/log/bing_bot/bing_bot.log",
     	"random_words_repo": "https://raw.githubusercontent.com/tadms/random/master/words.json"
     }
 

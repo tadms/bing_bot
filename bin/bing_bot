@@ -161,8 +161,8 @@ echo -n "$help_banner"
 }
 
 function opt_parse {
-  CONFIG_OPTION=false
-  CONFIG_FILE="../conf/default_conf.json"
+  DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && cd ../ && pwd )"
+  CONFIG_FILE="$DIR/conf/default_conf.json"
   while getopts ":hc:" opt; do
     case $opt in
       h)
