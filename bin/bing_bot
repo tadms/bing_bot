@@ -37,7 +37,6 @@ function init_config {
     MAX_SECONDS=$(cat $config_file | jq -r .max_seconds_between_searches)
     MIN_SEARCHES=$(cat $config_file | jq -r .min_amount_of_searches_to_run)
     MAX_SEARCHES=$(cat $config_file | jq -r .max_amount_of_searches_to_run)
-    BROWSER_PROCESS=$(cat $config_file | jq -r .browser_process_name)
     LOG_FILE=$(cat $config_file | jq -r .log_file_path)
   else
     echo "ERROR - Configuration file [$config_file] not found."
@@ -95,9 +94,10 @@ function show_progress {
   echo -ne "$TXTGRN""$msg""$TXTRST"\\r
 }
 
-function bing {
+function curl_bing {
   local term=$@
-  chromium-browser "http://www.bing.com/search?q=$term" > /dev/null 2>&1 &
+  curl https://www.bing.com/search?q=$term \
+  -b "$(cat $COOKIE_FILE)" > /dev/null 2>&1 &
 }
 
 
@@ -163,6 +163,7 @@ echo -n "$help_banner"
 function opt_parse {
   DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && cd ../ && pwd )"
   CONFIG_FILE="$DIR/conf/default_conf.json"
+  COOKIE_FILE="$DIR/conf/cookie.txt"
   while getopts ":hc:" opt; do
     case $opt in
       h)
@@ -206,7 +207,7 @@ function main {
     show_progress "$msg"
     log "$msg"
 
-    bing $word
+    curl_bing $word
     sleep $time
     killall $BROWSER_PROCESS > /dev/null 2>&1
 
