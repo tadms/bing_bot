@@ -209,7 +209,6 @@ function main {
 
     curl_bing $word
     sleep $time
-    killall $BROWSER_PROCESS > /dev/null 2>&1
 
     local count=$(($count + 1))
   done
