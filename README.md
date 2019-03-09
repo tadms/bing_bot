@@ -22,7 +22,7 @@ In a terminal, run the following command in your desired directory:
 `curl -sSL https://raw.githubusercontent.com/tadms/bing_bot/master/bin/setup | bash`
 
 
-##### Credentials / Cookie Setup
+#### Credentials / Cookie Setup
 
 The **bing_bot** relies on your Chromium generated cookies to authenticate with Bing.  The value of your Bing cookie request header gets passed to each cURL request.  This value is not stored in clear text on the system.  As a result, some manual steps are required.
 1. On your Raspberry Pi, launch the GUI.  
