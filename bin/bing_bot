@@ -19,7 +19,6 @@ $TXTBLD\"The Bot that Bing's, so you don't have to...\" $TXTRST
 $TXTBLD"GitHub:"$TXTRST      $TXTPRP"https://github.com/tadms/bing_bot"$TXTRST
 $TXTBLD"Config:"$TXTRST      $TXTPRP"$CONFIG_FILE"$TXTRST
 $TXTBLD"Log:"$TXTRST         $TXTPRP"$LOG_FILE"$TXTRST
-$TXTBLD"User-Agent:"$TXTRST  $TXTPRP"$(cat $USER_AGENT_FILE)"$TXTRST
 
 $LINE
 $LINE_BOLD
@@ -76,7 +75,7 @@ function start_log {
   echo >> $LOG_FILE
   echo $LINE_BOLD >> $LOG_FILE
   echo "$(date) - BING BOT START" >> $LOG_FILE
-  echo "User-Agent: $(cat $USER_AGENT_FILE)"  
+  echo "Mobile Option: $MOBILE_OPTION" >> $LOG_FILE
   echo $LINE_BOLD >> $LOG_FILE
 }
 
@@ -98,9 +97,11 @@ function show_progress {
 
 function curl_bing {
   local term=$@
-  curl -A \""$(cat $USER_AGENT_FILE)"\" \
+  local user_agent="$(cat $USER_AGENT_FILE)"
+  local cookie="$(cat $COOKIE_FILE)"
+  curl -v -A "\"$user_agent\"" \
   https://www.bing.com/search?q=$term \
-  -b "$(cat $COOKIE_FILE)" > /dev/null 2>&1 &
+  -b "\"$cookie\"" > /dev/null 2>&1 &
 }
 
 
@@ -166,22 +167,25 @@ echo -n "$help_banner"
 
 function opt_parse {
   DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && cd ../ && pwd )"
+  CONFIG_OPTION="false"
+  MOBILE_OPTION="false"
   CONFIG_FILE="$DIR/conf/default_conf.json"
   COOKIE_FILE="$DIR/conf/cookie.txt"
   USER_AGENT_FILE_EDGE="$DIR/conf/user_agent_edge.txt"
   USER_AGENT_FILE_MOBILE="$DIR/conf/user_agent_mobile.txt"
   USER_AGENT_FILE="$USER_AGENT_FILE_EDGE"
-  while getopts ":hc:m:" opt; do
+  while getopts ":hc:m" opt; do
     case $opt in
       h)
         print_help
         exit 0
         ;;
       c)
-        CONFIG_OPTION=true
+        CONFIG_OPTION="true"
         CONFIG_FILE=$OPTARG
         ;;
-      c)
+      m)
+        MOBILE_OPTION="true"
         USER_AGENT_FILE="$USER_AGENT_FILE_MOBILE"
         ;;
       \?)
