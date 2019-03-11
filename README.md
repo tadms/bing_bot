@@ -49,11 +49,18 @@ The **bing_bot** relies on your Chromium generated cookies to authenticate with 
 `vim bing_bot/conf/cookie.txt`
 
 
+User-Agent
+----------
+By default, the user agent is set to emulate the Microsoft Edge / Windows 10.  <br>
+Mobile mode `bing_bot -m` switches to a mobile (Android) user agent instead.
+
+
 Cron/Schedule Setup
 -------------------
 (Optional) Set up a cron job to run the **bing_bot** on a daily schedule. <br>
 `crontab -e` <br>
 `0 2 * * * sleep $(shuf -i 1-3600 -n 1) && /home/pi/bing_bot/bin/bing_bot` <br>
+`0 12 * * * sleep $(shuf -i 1-3600 -n 1) && /home/pi/bing_bot/bin/bing_bot -m` <br>
   * *Note:  The `sleep` command is used to randomize the start time.*
 
 
@@ -74,5 +81,6 @@ The default configuration can be found in `conf/default_conf.json`.
 Usage
 -----
     ./bing_bot                      Start up the bing_bot with defaults
-    ./bing_bot -c [config.json]     Start up the bing_bot with a custom config
+    ./bing_bot -c [config.json]     Start up the bing_bot with custom config
+    ./bing_bot -m                   Start up the bing_bot in mobile mode
     ./bing_bot -h                   Display this screen
